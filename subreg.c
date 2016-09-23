@@ -88,9 +88,8 @@ static int skip_block(state_t* state)
         }
         else if ( rc == ')' )
         {
+            if ( state->depth == depth ) break;
             state->depth--;
-            
-            if ( state->depth < depth ) break;
         }
         else if ( is_internal_block_boundary(rc) )
         {
@@ -237,6 +236,7 @@ static int parse_literal(state_t* state)
         rc = state->regex[0];
         if ( rc != ')' ) return SUBREG_RESULT_MISSING_BRACKET;
         
+        state->depth--;
         state->regex++;
         
         return result;
