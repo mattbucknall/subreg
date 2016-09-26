@@ -25,7 +25,7 @@ SubReg currently supports the following regular expression syntax:
 \d        Matches any digit character (0-9, codes 0x30-0x39)
 \D        Matches any non-digit character
 \s        Matches any whitespace character (\f, \n, \r, \t, \v or SPACE)
-\S        Matches any non-white character
+\S        Matches any non-whitespace character
 \w        Matches any word character (0-9, A-Z, a-z or _)
 \W        Matches any non-word character
 
@@ -59,7 +59,8 @@ just link `subreg.c` with the rest of your source code and ensure `subreg.h` is 
 
 SubReg exposes only a single public function:
 ```C
-int subreg_match(const char* regex, const char* input, subreg_capture_t captures[], unsigned int max_captures, unsigned int max_depth);
+int subreg_match(const char* regex, const char* input, subreg_capture_t captures[],
+    unsigned int max_captures, unsigned int max_depth);
 ```
 This function takes the following arguments:
 
