@@ -59,7 +59,7 @@ just link `subreg.c` with the rest of your source code and ensure `subreg.h` is 
 
 SubReg exposes only a single public function:
 ```C
-int subreg_match(const char* regex, const char* input, int max_depth);
+int subreg_match(const char* regex, const char* input, subreg_capture_t captures[], unsigned int max_captures, unsigned int max_depth);
 ```
 This function takes the following arguments:
 
@@ -75,16 +75,38 @@ If `input` matches against `regex` then the number of captures made will be retu
 
 |#define|Value|Description|
 |-------|-----|-----------|
-|SUBREG_RESULT_NO_MATCH|0|No match occurred|
-|SUBREG_RESULT_INVALID_ARGUMENT|-1|Invalid argument passed to function.|
-|SUBREG_RESULT_ILLEGAL_EXPRESSION|-2|Syntax error found in regular expression. This is a general syntax error response - If SubReg can provide a more descriptive syntax error code (as defined below), then it will.|
-|SUBREG_RESULT_MISSING_BRACKET|-3|A closing group bracket is missing from the regular expression.|
-|SUBREG_RESULT_SURPLUS_BRACKET|-4|A closing group bracket without a matching opening group bracket has been found.|
-|SUBREG_RESULT_INVALID_METACHARACTER|-5|The regular expression contains an invalid metacharacter (typically a malformed \ escape sequence)|
-|SUBREG_RESULT_MAX_DEPTH_EXCEEDED|-6|The nesting depth of groups contained within the regular expression exceeds the limit specified by `max_depth`.|
-|SUBREG_RESULT_CAPTURE_OVERFLOW|-7|Capture array not large enough.|
+|`SUBREG_RESULT_NO_MATCH`|0|No match occurred|
+|`SUBREG_RESULT_INVALID_ARGUMENT`|-1|Invalid argument passed to function.|
+|`SUBREG_RESULT_ILLEGAL_EXPRESSION`|-2|Syntax error found in regular expression. This is a general syntax error response - If SubReg can provide a more descriptive syntax error code (as defined below), then it will.|
+|`SUBREG_RESULT_MISSING_BRACKET`|-3|A closing group bracket is missing from the regular expression.|
+|`SUBREG_RESULT_SURPLUS_BRACKET`|-4|A closing group bracket without a matching opening group bracket has been found.|
+|`SUBREG_RESULT_INVALID_METACHARACTER`|-5|The regular expression contains an invalid metacharacter (typically a malformed \ escape sequence)|
+|`SUBREG_RESULT_MAX_DEPTH_EXCEEDED`|-6|The nesting depth of groups contained within the regular expression exceeds the limit specified by `max_depth`.|
+|`SUBREG_RESULT_CAPTURE_OVERFLOW`|-7|Capture array not large enough.|
 
 If a match occurs and `max_captures` = 0, this function still returns 1 but won't store the capture. This function may modify the captures array, even if an error occurs.
+
+Captures are represented using the struct type `subreg_capture_t`. The struct contains the following fields:
+
+|Field|Description|
+|-----|-----------|
+|`start`|Pointer to beginning of capture in input string provided to `subreg_match`.|
+|`length`|Number of characters in capture.|
+
+## Testing
+
+A basic test suite for SubReg is provided in the `tests` directory of SubReg's Git repository. [CMake](https://cmake.org/) is required to build the tests:
+```bash
+# from the root of your cloned SubReg repository:
+cd tests
+cmake .
+make
+./subreg-tests
+```
+
+## Bug Reports
+
+Please send bug reports/comments/suggestions regarding SubReg to matthew.bucknall@gmail.com.
 
 ## License
 
