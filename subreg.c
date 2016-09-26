@@ -23,7 +23,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-#include <stdio.h>
+
 #include "subreg.h"
 
 #define SUBREG_RESULT_INTERNAL_MATCH    1
