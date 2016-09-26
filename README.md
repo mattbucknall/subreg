@@ -23,8 +23,11 @@ SubReg currently supports the following regular expression syntax:
 \v        Matches vertical tab character (code 0x0B)
 \xXX      Matches character 0xXX
 \d        Matches any digit character (0-9, codes 0x30-0x39)
+\D        Matches any non-digit character
 \s        Matches any whitespace character (\f, \n, \r, \t, \v or SPACE)
 \S        Matches any non-white character
+\w        Matches any word character (0-9, A-Z, a-z or _)
+\W        Matches any non-word character
 
 \? \*     Matches meta character
 \+ etc.
@@ -33,7 +36,8 @@ SubReg currently supports the following regular expression syntax:
 *         Matches zero or more times
 +         Matches one or more times
 a|b       Matches a or b
-()        Grouping
+()        Capturing group
+(?)       Non-capturing group
 
 ^ $       See limitations
 ```
@@ -46,7 +50,6 @@ has the following additional limitations:
 
 - Only supports ASCII character encoding
 - Only supports anchored expressions (i.e. ^ and $ are implied whether specified or not).
-- No support for captures (yet)
 - Implementation designed to facilitate small memory footprint at the expense of execution speed
 
 ## Usage
@@ -64,18 +67,24 @@ This function takes the following arguments:
 |----------|-----------|
 |`regex`|Null-terminated string containing regular expression.|
 |`input`|Null-terminated string to match against regex.|
+|`captures`|Pointer to array of captures to populate.|
+|`max_captures`|Maximum permitted number of captures (should be equal to or less than the number of elements in the array pointed to by captures).|
 |`max_depth`|Maximum depth of nested groups to allow in regex. This value is used to limit SubReg's system stack usage. A value of 4 is probably enough to cover most use cases.|
 
-The function will return a value greater than zero if a match occurred, otherwise one of the following return codes will be returned:
+If `input` matches against `regex` then the number of captures made will be returned (the first capture spanning the entire input). If there is no match, the function will return zero otherwise one of the following return codes will be returned:
 
 |#define|Value|Description|
 |-------|-----|-----------|
 |SUBREG_RESULT_NO_MATCH|0|No match occurred|
-|SUBREG_RESULT_ILLEGAL_EXPRESSION|-1|Syntax error found in regular expression. This is a general syntax error response - If SubReg can provide a more descriptive syntax error code (as defined below), then it will.|
-|SUBREG_RESULT_MISSING_BRACKET|-2|A closing group bracket is missing from the regular expression.|
-|SUBREG_RESULT_SURPLUS_BRACKET|-3|A closing group bracket without a matching opening group bracket has been found.|
-|SUBREG_RESULT_INVALID_METACHARACTER|-4|The regular expression contains an invalid metacharacter (typically a malformed \ escape sequence)|
-|SUBREG_RESULT_MAX_DEPTH_EXCEEDED|-5|The nesting depth of groups contained within the regular expression exceeds the limit specified by `max_depth`.|
+|SUBREG_RESULT_INVALID_ARGUMENT|-1|Invalid argument passed to function.|
+|SUBREG_RESULT_ILLEGAL_EXPRESSION|-2|Syntax error found in regular expression. This is a general syntax error response - If SubReg can provide a more descriptive syntax error code (as defined below), then it will.|
+|SUBREG_RESULT_MISSING_BRACKET|-3|A closing group bracket is missing from the regular expression.|
+|SUBREG_RESULT_SURPLUS_BRACKET|-4|A closing group bracket without a matching opening group bracket has been found.|
+|SUBREG_RESULT_INVALID_METACHARACTER|-5|The regular expression contains an invalid metacharacter (typically a malformed \ escape sequence)|
+|SUBREG_RESULT_MAX_DEPTH_EXCEEDED|-6|The nesting depth of groups contained within the regular expression exceeds the limit specified by `max_depth`.|
+|SUBREG_RESULT_CAPTURE_OVERFLOW|-7|Capture array not large enough.|
+
+If a match occurs and `max_captures` = 0, this function still returns 1 but won't store the capture. This function may modify the captures array, even if an error occurs.
 
 ## License
 

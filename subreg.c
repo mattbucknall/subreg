@@ -23,7 +23,7 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
  */
-
+#include <stdio.h>
 #include "subreg.h"
 
 #define SUBREG_RESULT_INTERNAL_MATCH    1
@@ -33,7 +33,10 @@ typedef struct
 {
     const char* regex;
     const char* input;
-    int max_depth;
+    subreg_capture_t* captures;
+    unsigned int max_captures;
+    unsigned int max_depth;
+    unsigned int capture_index;
     int depth;
     
 } state_t;
@@ -124,23 +127,32 @@ static int is_match_result(int result)
 
 static int match_char(char c1, char c2)
 {
-    return (c1 == c2) ? SUBREG_RESULT_INTERNAL_MATCH :
-            SUBREG_RESULT_NO_MATCH;
+    return (c1 == c2) ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
 }
 
 
 static int match_digit(char c)
 {
-    return ((c >= '0') && (c <= '9')) ? SUBREG_RESULT_INTERNAL_MATCH :
-            SUBREG_RESULT_NO_MATCH;
+    return ((c >= '0') && (c <= '9')) ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
+}
+
+
+static int match_word(char c)
+{
+    return ((c >= '0') && (c <= '9')) ||
+            ((c >= 'A') && (c <= 'Z')) ||
+            ((c >= 'a') && (c <= 'z')) ||
+            (c == '_');
 }
 
 
 static int match_whitespace(char c)
 {
     return ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\v') ||
-            (c == '\f') || (c == '\r')) ? SUBREG_RESULT_INTERNAL_MATCH :
-            SUBREG_RESULT_NO_MATCH;
+            (c == '\f') || (c == '\r')) ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
 }
 
 
@@ -148,8 +160,8 @@ static int invert_match(int result)
 {
     if ( is_bad_result(result) ) return result;
     
-    return is_match_result(result) ? SUBREG_RESULT_NO_MATCH :
-            SUBREG_RESULT_INTERNAL_MATCH;
+    return is_match_result(result) ?
+            SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
 }
 
 
@@ -225,10 +237,24 @@ static int parse_literal(state_t* state)
     
     if ( rc == '(' )
     {
-        state->depth++;
+        int capturing;
+        const char* input_start;
         
+        state->depth++;
+    
         if ( state->depth > state->max_depth )
-            return SUBREG_RESULT_MAX_DEPTH_EXCEEDED;
+                return SUBREG_RESULT_MAX_DEPTH_EXCEEDED;
+        
+        if ( state->regex[0] == '?' )
+        {
+            state->regex++;
+            capturing = 0;
+        }
+        else
+        {
+            input_start = state->input;
+            capturing = 1;
+        }
         
         result = parse_sub_expr(state);
         if ( is_bad_result(result) ) return result;
@@ -236,8 +262,27 @@ static int parse_literal(state_t* state)
         rc = state->regex[0];
         if ( rc != ')' ) return SUBREG_RESULT_MISSING_BRACKET;
         
-        state->depth--;
         state->regex++;
+        
+        if ( capturing && is_match_result(result) )
+        {
+            unsigned int next_capture_index;
+            subreg_capture_t* cap;
+            
+            next_capture_index = state->capture_index + 1;
+            
+            if ( next_capture_index > state->max_captures )
+                    return SUBREG_RESULT_CAPTURE_OVERFLOW;
+        
+            cap = &state->captures[state->capture_index];
+            
+            cap->start = input_start;
+            cap->length = state->input - input_start;
+            
+            state->capture_index = next_capture_index;
+        }
+        
+        state->depth--;
         
         return result;
     }
@@ -248,9 +293,12 @@ static int parse_literal(state_t* state)
         
         switch (rc)
         {
-        case 'S':   result = invert_match(match_whitespace(c)); break;
-        case 'd':   result = match_digit(c);                    break;
-        case 's':   result = match_whitespace(c);               break;
+        case 'D':   result = invert_match(match_digit(c));          break;
+        case 'S':   result = invert_match(match_whitespace(c));     break;
+        case 'W':   result = invert_match(match_word(c));           break;
+        case 'd':   result = match_digit(c);                        break;
+        case 's':   result = match_whitespace(c);                   break;
+        case 'w':   result = match_word(c);                         break;
         
         default:
             result = decode_non_class_metacharacter(state, &rc);
@@ -367,7 +415,6 @@ static int parse_alternation(state_t* state)
         
         if ( is_match_result(result) )
         {
-            
             for (;;)
             {
                 result = skip_block(state);
@@ -424,17 +471,37 @@ static int parse_expr(state_t* state)
 
 
 int subreg_match(const char* regex, const char* input,
-        int max_depth)
+        subreg_capture_t captures[], unsigned int max_captures,
+        unsigned int max_depth)
 {
     state_t state;
     int result;
     
+    if ( !regex || !input || (max_captures > 0 && !captures) )
+        return SUBREG_RESULT_INVALID_ARGUMENT;
+    
     state.regex = regex;
     state.input = input;
+    state.captures = captures;
+    state.max_captures = max_captures;
     state.max_depth = max_depth;
+    state.capture_index = 1;
     state.depth = 0;
     
     result = parse_expr(&state);
     
-    return result;
+    if ( result <= 0 )
+    {
+        return result;
+    }
+    else
+    {
+        if ( max_captures > 0 )
+        {
+            captures[0].start = input;
+            captures[0].length = state.input - input;
+        }
+        
+        return (int) (state.capture_index);
+    } 
 }

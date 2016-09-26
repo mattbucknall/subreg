@@ -27,31 +27,37 @@
 #ifndef _SUBREG_H_
 #define _SUBREG_H_
 
+
+/**
+ * Result code. Capture array not large enough.
+ */
+#define SUBREG_RESULT_CAPTURE_OVERFLOW          -7
+
 /**
  * Result code. The nesting depth of groups contained within the regular
  * expression exceeds the limit specified by max_depth.
  */
-#define SUBREG_RESULT_MAX_DEPTH_EXCEEDED        -5
+#define SUBREG_RESULT_MAX_DEPTH_EXCEEDED        -6
 
 
 /**
  * Result code. The regular expression contains an invalid metacharacter
  * (typically a malformed \ escape sequence).
  */
-#define SUBREG_RESULT_INVALID_METACHARACTER     -4
+#define SUBREG_RESULT_INVALID_METACHARACTER     -5
 
 
 /**
  * Result code. A closing group bracket without a matching opening group
  * bracket has been found.
  */
-#define SUBREG_RESULT_SURPLUS_BRACKET           -3
+#define SUBREG_RESULT_SURPLUS_BRACKET           -4
 
 
 /**
  * Result code. A closing group bracket is missing from the regular expression.
  */
-#define SUBREG_RESULT_MISSING_BRACKET           -2
+#define SUBREG_RESULT_MISSING_BRACKET           -3
 
 
 /**
@@ -59,13 +65,38 @@
  * syntax error response - If SubReg can provide a more descriptive result
  * code, then it will.
  */
-#define SUBREG_RESULT_ILLEGAL_EXPRESSION        -1
+#define SUBREG_RESULT_ILLEGAL_EXPRESSION        -2
+
+
+/**
+ * Result code. Invalid argument passed to function.
+ */
+#define SUBREG_RESULT_INVALID_ARGUMENT          -1
 
 
 /**
  * No match occurred.
  */
 #define SUBREG_RESULT_NO_MATCH                  0
+
+
+/**
+ * Represents a capture as an input string fragment.
+ */
+typedef struct subreg_capture_t
+{
+    /**
+     * Pointer to beginning of capture in input string.
+     */
+    const char* start;
+    
+    
+    /**
+     * Number of characters in capture.
+     */
+    unsigned int length;
+    
+} subreg_capture_t;
 
 
 /**
@@ -76,14 +107,29 @@
  * 
  * \param input         Null-terminated string to match against regex.
  * 
+ * \param captures      Pointer to array of captures to populate.
+ * 
+ * \param max_captures  Maximum permitted number of captures (should be equal
+ *                      to or less than the number of elements in the array
+ *                      pointed to by captures).
+ * 
  * \param max_depth     Maximum depth of nested groups to allow in regex.
  *                      This value is used to limit SubReg's system stack
  *                      usage. A value of 4 is probably enough to cover
  *                      most use cases.
  * 
- * \return              >0 if input matches regex, SUBREG_RESULT_NO_MATCH if it
- *                      does not or <0 if an error occurred.
+ * \return              Number of captures if input matches regex (first
+ *                      capture is always entire input), SUBREG_RESULT_NO_MATCH
+ *                      if it does not or <0 if an error occurred.
+ * 
+ * \note    If a match occurs and max_captures = 0, this function still returns
+ *          1 but won't store the capture.
+ * 
+ * \note    This function may modify the captures array, even if an error
+ *          occurs.
  */
-int subreg_match(const char* regex, const char* input, int max_depth);
+int subreg_match(const char* regex, const char* input,
+        subreg_capture_t captures[], unsigned int max_captures,
+        unsigned int max_depth);
 
 #endif /* _SUBREG_H_ */
