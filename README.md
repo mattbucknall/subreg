@@ -1,5 +1,5 @@
 # SubReg
-Small footprint regular expression engine written in ANSI C.
+A small footprint regular expression engine written in ANSI C.
 
 ## Features
 - Single source file, single header - Just statically link with your own code
@@ -7,8 +7,8 @@ Small footprint regular expression engine written in ANSI C.
 - Written in ANSI C - SubReg should run on more or less any platform
 - No external dependencies
 - No internal use of statically or dynamically allocated memory structures
-- Very light use of system stack with parameterized recursion limit
-- Regular expressions are interpreted directly
+- Very light use of system stack with configurable recursion limit
+- Supports captures
 
 ## Syntax
 
