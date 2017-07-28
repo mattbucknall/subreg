@@ -7,7 +7,7 @@ Small footprint regular expression engine written in ANSI C.
 - Written in ANSI C - SubReg should run on more or less any platform
 - No external dependencies
 - No internal use of statically or dynamically allocated memory structures
-- Very light use of system stack with parameterized recurrsion limit
+- Very light use of system stack with parameterized recursion limit
 - Regular expressions are interpreted directly
 
 ## Syntax
