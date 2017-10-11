@@ -24,6 +24,8 @@ SubReg currently supports the following regular expression syntax:
 \xXX      Matches character 0xXX
 \d        Matches any digit character (0-9, codes 0x30-0x39)
 \D        Matches any non-digit character
+\h        Matches any hexadecimal character (0-9, A-F or a-f)
+\H        Matches any non-hexadecimal character
 \s        Matches any whitespace character (\f, \n, \r, \t, \v or SPACE)
 \S        Matches any non-whitespace character
 \w        Matches any word character (0-9, A-Z, a-z or _)

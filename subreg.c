@@ -139,12 +139,22 @@ static int match_digit(char c)
 }
 
 
+static int match_hexadecimal(char c)
+{
+    return ((c >= '0') && (c <= '9')) ||
+            ((c >= 'A') && (c <= 'F')) ||
+            ((c >= 'a') && (c <= 'f')) ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
+}
+
+
 static int match_word(char c)
 {
     return ((c >= '0') && (c <= '9')) ||
             ((c >= 'A') && (c <= 'Z')) ||
             ((c >= 'a') && (c <= 'z')) ||
-            (c == '_');
+            (c == '_') ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
 }
 
 
@@ -294,9 +304,11 @@ static int parse_literal(state_t* state)
         switch (rc)
         {
         case 'D':   result = invert_match(match_digit(c));          break;
+        case 'H':   result = invert_match(match_hexadecimal(c));    break;
         case 'S':   result = invert_match(match_whitespace(c));     break;
         case 'W':   result = invert_match(match_word(c));           break;
         case 'd':   result = match_digit(c);                        break;
+        case 'h':   result = match_hexadecimal(c);                  break;
         case 's':   result = match_whitespace(c);                   break;
         case 'w':   result = match_word(c);                         break;
         
