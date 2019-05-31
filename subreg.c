@@ -166,12 +166,17 @@ static int match_whitespace(char c)
 }
 
 
-static int invert_match(int result)
+static int invert_match(char c, int (*match_func)(char))
 {
+    int result;
+
+    if ( is_end(c) ) return SUBREG_RESULT_NO_MATCH;
+
+    result = match_func(c);
+
     if ( is_bad_result(result) ) return result;
-    
-    return is_match_result(result) ?
-            SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
+    else return is_match_result(result) ?
+        SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
 }
 
 
@@ -303,10 +308,10 @@ static int parse_literal(state_t* state)
         
         switch (rc)
         {
-        case 'D':   result = invert_match(match_digit(c));          break;
-        case 'H':   result = invert_match(match_hexadecimal(c));    break;
-        case 'S':   result = invert_match(match_whitespace(c));     break;
-        case 'W':   result = invert_match(match_word(c));           break;
+        case 'D':   result = invert_match(c, match_digit);          break;
+        case 'H':   result = invert_match(c, match_hexadecimal);    break;
+        case 'S':   result = invert_match(c, match_whitespace);     break;
+        case 'W':   result = invert_match(c, match_word);           break;
         case 'd':   result = match_digit(c);                        break;
         case 'h':   result = match_hexadecimal(c);                  break;
         case 's':   result = match_whitespace(c);                   break;

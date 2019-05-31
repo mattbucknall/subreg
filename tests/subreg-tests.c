@@ -585,49 +585,113 @@ static void test_repeat_group_capture(void)
 }
 
 
+static void test_single_class_capture(void)
+{
+    subreg_capture_t cap[2];
+    
+    TEST_CHECK( subreg_match("(\\d)", "1", cap, 2, 4) == 2 );
+    TEST_CHECK( cap[0].length == 1 );
+    TEST_CHECK( memcmp(cap[0].start, "1", 1) == 0 );
+    TEST_CHECK( cap[1].length == 1 );
+    TEST_CHECK( memcmp(cap[1].start, "1", 1) == 0 );
+}
+
+
+static void test_single_non_class_capture(void)
+{
+    subreg_capture_t cap[2];
+    
+    TEST_CHECK( subreg_match("(\\D)", "a", cap, 2, 4) == 2 );
+    TEST_CHECK( cap[0].length == 1 );
+    TEST_CHECK( memcmp(cap[0].start, "a", 1) == 0 );
+    TEST_CHECK( cap[1].length == 1 );
+    TEST_CHECK( memcmp(cap[1].start, "a", 1) == 0 );
+}
+
+
+static void test_repeat_class_capture(void)
+{
+    subreg_capture_t cap[5];
+
+    TEST_CHECK( subreg_match("(\\d)+", "1234", cap, 5, 4) == 5 );
+    TEST_CHECK( cap[0].length == 4 );
+    TEST_CHECK( memcmp(cap[0].start, "1234", 4) == 0 );
+    TEST_CHECK( cap[1].length == 1 );
+    TEST_CHECK( *(cap[1].start) == '1' );
+    TEST_CHECK( cap[2].length == 1 );
+    TEST_CHECK( *(cap[2].start) == '2' );
+    TEST_CHECK( cap[3].length == 1 );
+    TEST_CHECK( *(cap[3].start) == '3' );
+    TEST_CHECK( cap[4].length == 1 );
+    TEST_CHECK( *(cap[4].start) == '4' );
+}
+
+// test for issue #2 raised by gogo9th on github
+static void test_repeat_non_class_capture(void)
+{
+    subreg_capture_t cap[5];
+
+    TEST_CHECK( subreg_match("(\\D)+", "abcd", cap, 5, 4) == 5 );
+    TEST_CHECK( cap[0].length == 4 );
+    TEST_CHECK( memcmp(cap[0].start, "abcd", 4) == 0 );
+    TEST_CHECK( cap[1].length == 1 );
+    TEST_CHECK( *(cap[1].start) == 'a' );
+    TEST_CHECK( cap[2].length == 1 );
+    TEST_CHECK( *(cap[2].start) == 'b' );
+    TEST_CHECK( cap[3].length == 1 );
+    TEST_CHECK( *(cap[3].start) == 'c' );
+    TEST_CHECK( cap[4].length == 1 );
+    TEST_CHECK( *(cap[4].start) == 'd' );
+}
+
+
 TEST_LIST =
 {
-    {"empty_pass",                  test_empty_pass},
-    {"empty_fail",                  test_empty_fail},
-    {"literal",                     test_literal},
-    {"simple_pass",                 test_simple_pass},
-    {"simple_fail",                 test_simple_fail},
-    {"digit",                       test_digit},
-    {"non_digit",                   test_non_digit},
-    {"hex_digit",                   test_hex_digit},
-    {"non_hex_digit",               test_non_hex_digit},
-    {"whitespace",                  test_whitespace},
-    {"non_whitespace",              test_non_whitespace},
-    {"word",                        test_word},
-    {"non_word",                    test_non_word},
-    {"backspace",                   test_backspace},
-    {"form_feed",                   test_form_feed},
-    {"new_line",                    test_new_line},
-    {"carriage_return",             test_carriage_return},
-    {"horizontal_tab",              test_horizontal_tab},
-    {"vertical_tab",                test_vertical_tab},
-    {"hex_escape_code",             test_hex_escape_code},
-    {"any",                         test_any},
-    {"optional_none",               test_optional_none},
-    {"optional_one",                test_optional_one},
-    {"zero_or_more",                test_zero_or_more},
-    {"one_or_more_pass",            test_one_or_more_pass},
-    {"one_or_more_fail",            test_one_or_more_fail},
-    {"or_one_of_two",               test_or_one_of_two},
-    {"or_two_of_two",               test_or_two_of_two},
-    {"or_none_of_two",              test_or_none_of_two},
-    {"or_one_of_three",             test_or_one_of_three},
-    {"or_two_of_three",             test_or_two_of_three},
-    {"or_three_of_three",           test_or_three_of_three},
-    {"or_none_of_three",            test_or_none_of_three},
-    {"simple_ncg_pass",             test_simple_ncg_pass},
-    {"simple_ncg_fail",             test_simple_ncg_fail},
-    {"one_or_more_ncg_pass",        test_one_or_more_ncg_pass},
-    {"one_or_more_ncg_fail",        test_one_or_more_ncg_fail},
-    {"overall_capture",             test_overall_capture},
-    {"single_group_capture",        test_single_group_capture},
-    {"multiple_group_capture",      test_multiple_group_capture},
-    {"repeat_group_capture",        test_repeat_group_capture},
+    {"empty_pass",                      test_empty_pass},
+    {"empty_fail",                      test_empty_fail},
+    {"literal",                         test_literal},
+    {"simple_pass",                     test_simple_pass},
+    {"simple_fail",                     test_simple_fail},
+    {"digit",                           test_digit},
+    {"non_digit",                       test_non_digit},
+    {"hex_digit",                       test_hex_digit},
+    {"non_hex_digit",                   test_non_hex_digit},
+    {"whitespace",                      test_whitespace},
+    {"non_whitespace",                  test_non_whitespace},
+    {"word",                            test_word},
+    {"non_word",                        test_non_word},
+    {"backspace",                       test_backspace},
+    {"form_feed",                       test_form_feed},
+    {"new_line",                        test_new_line},
+    {"carriage_return",                 test_carriage_return},
+    {"horizontal_tab",                  test_horizontal_tab},
+    {"vertical_tab",                    test_vertical_tab},
+    {"hex_escape_code",                 test_hex_escape_code},
+    {"any",                             test_any},
+    {"optional_none",                   test_optional_none},
+    {"optional_one",                    test_optional_one},
+    {"zero_or_more",                    test_zero_or_more},
+    {"one_or_more_pass",                test_one_or_more_pass},
+    {"one_or_more_fail",                test_one_or_more_fail},
+    {"or_one_of_two",                   test_or_one_of_two},
+    {"or_two_of_two",                   test_or_two_of_two},
+    {"or_none_of_two",                  test_or_none_of_two},
+    {"or_one_of_three",                 test_or_one_of_three},
+    {"or_two_of_three",                 test_or_two_of_three},
+    {"or_three_of_three",               test_or_three_of_three},
+    {"or_none_of_three",                test_or_none_of_three},
+    {"simple_ncg_pass",                 test_simple_ncg_pass},
+    {"simple_ncg_fail",                 test_simple_ncg_fail},
+    {"one_or_more_ncg_pass",            test_one_or_more_ncg_pass},
+    {"one_or_more_ncg_fail",            test_one_or_more_ncg_fail},
+    {"overall_capture",                 test_overall_capture},
+    {"single_group_capture",            test_single_group_capture},
+    {"multiple_group_capture",          test_multiple_group_capture},
+    {"repeat_group_capture",            test_repeat_group_capture},
+    {"test_single_class_capture",       test_single_class_capture},
+    {"test_single_non_class_capture",   test_single_non_class_capture},
+    {"test_repeat_class_capture",       test_repeat_class_capture},
+    {"test_repeat_non_class_capture",   test_repeat_non_class_capture},
     
     {0}
 };
