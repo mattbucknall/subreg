@@ -52,6 +52,7 @@ has the following additional limitations:
 
 - Only supports ASCII character encoding
 - Only supports anchored expressions (i.e. ^ and $ are implied whether specified or not).
+- Matches are greedy.
 - Implementation designed to facilitate small memory footprint at the expense of execution speed
 
 ## Usage
