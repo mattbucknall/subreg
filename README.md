@@ -1,5 +1,6 @@
 # SubReg
-A small footprint regular expression engine written in ANSI C.
+A small footprint regular expression engine written in ANSI C, originially
+implented for use in embedded systems with limited memory resources.
 
 ## Features
 - Single source file, single header - Just statically link with your own code
@@ -14,14 +15,14 @@ A small footprint regular expression engine written in ANSI C.
 SubReg currently supports the following regular expression syntax:
 ```
 .         Matches any character
-\b        Matches backspace character (code 0x08)
-\f        Matches form feed character (code 0x0C)
-\n        Matches new line/line feed character (code 0x0A)
-\r        Matches carriage return character (code 0x0D)
-\t        Matches horizontal tab character (code 0x09)
-\v        Matches vertical tab character (code 0x0B)
+\b        Matches backspace character (ASCII code 0x08)
+\f        Matches form feed character (ASCII code 0x0C)
+\n        Matches new line/line feed character (ASCII code 0x0A)
+\r        Matches carriage return character (ASCII code 0x0D)
+\t        Matches horizontal tab character (ASCII code 0x09)
+\v        Matches vertical tab character (ASCII code 0x0B)
 \xXX      Matches character 0xXX
-\d        Matches any digit character (0-9, codes 0x30-0x39)
+\d        Matches any digit character (0-9, ASCII codes 0x30-0x39)
 \D        Matches any non-digit character
 \h        Matches any hexadecimal character (0-9, A-F or a-f)
 \H        Matches any non-hexadecimal character
@@ -38,7 +39,9 @@ SubReg currently supports the following regular expression syntax:
 +         Matches one or more times
 a|b       Matches a or b
 ()        Capturing group
-(?)       Non-capturing group
+(?:)      Non-capturing group
+(?=)      Positive look-ahead
+(?!)      Negative look-ahead
 
 ^ $       See limitations
 ```

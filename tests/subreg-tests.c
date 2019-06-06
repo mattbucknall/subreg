@@ -585,6 +585,12 @@ static void test_repeat_group_capture(void)
 }
 
 
+static void test_capture_with_no_array(void)
+{
+    TEST_CHECK( subreg_match("(hello)", "hello", NULL, 0, 4) == 1 );
+}
+
+
 static void test_single_class_capture(void)
 {
     subreg_capture_t cap[2];
@@ -748,6 +754,26 @@ static void test_capture_or_plus_3(void)
 }
 
 
+static void test_pos_look_ahead(void)
+{
+    subreg_capture_t cap[2];
+    
+    TEST_CHECK( subreg_match("(?=hello)(.*)", "hello world", cap, 2, 4) == 2 );
+    TEST_CHECK( cap[0].length == 11 );
+    TEST_CHECK( memcmp(cap[0].start, "hello world", 11) == 0 );
+    TEST_CHECK( cap[1].length == 11 );
+    TEST_CHECK( memcmp(cap[1].start, "hello world", 11) == 0 );
+}
+
+
+static void test_neg_look_ahead(void)
+{
+    subreg_capture_t cap[2];
+    
+    TEST_CHECK( subreg_match("(?!hello)(.*)", "hello world", cap, 2, 4) == 0 );
+}
+
+
 TEST_LIST =
 {
     {"empty_pass",                          test_empty_pass},
@@ -791,17 +817,20 @@ TEST_LIST =
     {"single_group_capture",                test_single_group_capture},
     {"multiple_group_capture",              test_multiple_group_capture},
     {"repeat_group_capture",                test_repeat_group_capture},
-    {"test_single_class_capture",           test_single_class_capture},
-    {"test_single_non_class_capture",       test_single_non_class_capture},
-    {"test_repeat_class_capture",           test_repeat_class_capture},
-    {"test_repeat_non_class_capture",       test_repeat_non_class_capture},
-    {"test_capture_or_first",               test_capture_or_first},
-    {"test_capture_or_second",              test_capture_or_second},
-    {"test_capture_or_then_char",           test_capture_or_then_char},
-    {"test_capture_or_1_plus_then_char",    test_capture_or_1_plus_then_char},
-    {"test_capture_or_2_plus_then_char",    test_capture_or_2_plus_then_char},
-    {"test_capture_or_plus_1",              test_capture_or_plus_1},
-    {"test_capture_or_plus_2",              test_capture_or_plus_2},
-    {"test_capture_or_plus_3",              test_capture_or_plus_3},
+    {"capture_with_no_array",               test_capture_with_no_array},
+    {"single_class_capture",                test_single_class_capture},
+    {"single_non_class_capture",            test_single_non_class_capture},
+    {"repeat_class_capture",                test_repeat_class_capture},
+    {"repeat_non_class_capture",            test_repeat_non_class_capture},
+    {"capture_or_first",                    test_capture_or_first},
+    {"capture_or_second",                   test_capture_or_second},
+    {"capture_or_then_char",                test_capture_or_then_char},
+    {"capture_or_1_plus_then_char",         test_capture_or_1_plus_then_char},
+    {"capture_or_2_plus_then_char",         test_capture_or_2_plus_then_char},
+    {"capture_or_plus_1",                   test_capture_or_plus_1},
+    {"capture_or_plus_2",                   test_capture_or_plus_2},
+    {"capture_or_plus_3",                   test_capture_or_plus_3},
+    {"pos_look_ahead",                      test_pos_look_ahead},
+    {"neg_look_ahead",                      test_neg_look_ahead},
     {0}
 };

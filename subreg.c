@@ -29,6 +29,16 @@
 #define SUBREG_RESULT_INTERNAL_MATCH    1
 
 
+typedef enum
+{
+    MODE_NON_CAPTURE,
+    MODE_CAPTURE,
+    MODE_POS_LOOK_AHEAD,
+    MODE_NEG_LOOK_AHEAD
+
+} mode_t;
+
+
 typedef struct
 {
     const char* regex;
@@ -244,6 +254,10 @@ static int parse_literal(state_t* state)
     int result;
     char c;
     char rc;
+    mode_t mode;
+    const char* input_start;
+    unsigned int next_capture_index;
+    subreg_capture_t* cap;
     
     c = state->input[0];
     
@@ -252,28 +266,26 @@ static int parse_literal(state_t* state)
     
     if ( rc == '(' )
     {
-        int capturing = 0;
-        const char* input_start;
-        
         state->depth++;
     
         if ( state->depth > state->max_depth )
                 return SUBREG_RESULT_MAX_DEPTH_EXCEEDED;
         
+        input_start = state->input;
+
         if ( state->regex[0] == '?' )
         {
             state->regex++;
-
-            if ( state->regex[0] != ':')
-                return SUBREG_RESULT_ILLEGAL_EXPRESSION;
+            
+            if ( state->regex[0] == ':' ) mode = MODE_NON_CAPTURE;
+            else if ( state->regex[0] == '=' ) mode = MODE_POS_LOOK_AHEAD;
+            else if ( state->regex[0] == '!' ) mode = MODE_NEG_LOOK_AHEAD;
+            else return SUBREG_RESULT_ILLEGAL_EXPRESSION;
             
             state->regex++;
         }
-        else if ( state->max_captures > 0 )
-        {
-            input_start = state->input;
-            capturing = 1;
-        }
+        else if ( state->max_captures > 0 ) mode = MODE_CAPTURE;
+        else mode = MODE_NON_CAPTURE;
         
         result = parse_sub_expr(state);
         if ( is_bad_result(result) ) return result;
@@ -283,22 +295,33 @@ static int parse_literal(state_t* state)
         
         state->regex++;
         
-        if ( capturing && is_match_result(result) )
+        if ( mode == MODE_CAPTURE )
         {
-            unsigned int next_capture_index;
-            subreg_capture_t* cap;
+            if ( is_match_result(result) )
+            {
+                next_capture_index = state->capture_index + 1;
+                
+                if ( next_capture_index > state->max_captures )
+                        return SUBREG_RESULT_CAPTURE_OVERFLOW;
             
-            next_capture_index = state->capture_index + 1;
-            
-            if ( next_capture_index > state->max_captures )
-                    return SUBREG_RESULT_CAPTURE_OVERFLOW;
-        
-            cap = &state->captures[state->capture_index];
-            
-            cap->start = input_start;
-            cap->length = state->input - input_start;
-            
-            state->capture_index = next_capture_index;
+                cap = &state->captures[state->capture_index];
+                
+                cap->start = input_start;
+                cap->length = state->input - input_start;
+                
+                state->capture_index = next_capture_index;
+            }
+        }
+        else if ( mode == MODE_POS_LOOK_AHEAD )
+        {
+            state->input = input_start;
+        }
+        else if ( mode == MODE_NEG_LOOK_AHEAD )
+        {
+            state->input = input_start;
+
+            result = is_match_result(result) ?
+                    SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
         }
         
         state->depth--;
