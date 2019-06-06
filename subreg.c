@@ -3,7 +3,7 @@
  * 
  * https://github.com/mattbucknall/subreg
  * 
- * Copyright (c) 2016 Matthew T. Bucknall
+ * Copyright (c) 2016-2019 Matthew T. Bucknall
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -252,7 +252,7 @@ static int parse_literal(state_t* state)
     
     if ( rc == '(' )
     {
-        int capturing;
+        int capturing = 0;
         const char* input_start;
         
         state->depth++;
@@ -263,9 +263,13 @@ static int parse_literal(state_t* state)
         if ( state->regex[0] == '?' )
         {
             state->regex++;
-            capturing = 0;
+
+            if ( state->regex[0] != ':')
+                return SUBREG_RESULT_ILLEGAL_EXPRESSION;
+            
+            state->regex++;
         }
-        else
+        else if ( state->max_captures > 0 )
         {
             input_start = state->input;
             capturing = 1;
@@ -353,6 +357,7 @@ static int parse_repetition(state_t* state)
 {
     const char* regex_begin;
     const char* regex_end;
+    const char* check_point;
     int result;
     char rc;
     
@@ -387,11 +392,16 @@ static int parse_repetition(state_t* state)
     for (;;)
     {
         state->regex = regex_begin;
-        
+        check_point = state->input;
+
         result = parse_literal(state);
         if ( is_bad_result(result) ) return result;
         
-        if ( !is_match_result(result) ) break;
+        if ( !is_match_result(result) )
+        {
+            state->input = check_point;
+            break;
+        }
     }
     
     state->regex = regex_end;
@@ -436,7 +446,7 @@ static int parse_alternation(state_t* state)
             {
                 result = skip_block(state);
                 if ( is_bad_result(result) ) return result;
-                
+
                 if ( state->regex[0] == '|' ) state->regex++;
                 else return SUBREG_RESULT_INTERNAL_MATCH;
             }

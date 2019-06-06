@@ -11,7 +11,6 @@ A small footprint regular expression engine written in ANSI C.
 - Supports captures
 
 ## Syntax
-
 SubReg currently supports the following regular expression syntax:
 ```
 .         Matches any character
