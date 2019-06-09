@@ -774,6 +774,54 @@ static void test_neg_look_ahead(void)
 }
 
 
+// test for ? issue #5 raised by gogo9th on github
+static void test_optional_capture_no_match(void)
+{
+    subreg_capture_t cap[2];
+
+    TEST_CHECK( subreg_match("B(AAC)?AAD", "BAAD", cap, 2, 4) == 1 );
+    TEST_CHECK( cap[0].length == 4 );
+    TEST_CHECK( memcmp(cap[0].start, "BAAD", 4) == 0 );
+}
+
+
+static void test_optional_capture_match(void)
+{
+    subreg_capture_t cap[2];
+
+    TEST_CHECK( subreg_match("B(AAC)?AAD", "BAACAAD", cap, 2, 4) == 2 );
+    TEST_CHECK( cap[0].length == 7 );
+    TEST_CHECK( memcmp(cap[0].start, "BAACAAD", 7) == 0 );
+    TEST_CHECK( cap[1].length == 3 );
+    TEST_CHECK( memcmp(cap[1].start, "AAC", 3) == 0 );
+}
+
+
+// test for * issue #5 raised by gogo9th on github
+static void test_zero_more_capture_no_match(void)
+{
+    subreg_capture_t cap[2];
+
+    TEST_CHECK( subreg_match("B(AAC)*AAD", "BAAD", cap, 2, 4) == 1 );
+    TEST_CHECK( cap[0].length == 4 );
+    TEST_CHECK( memcmp(cap[0].start, "BAAD", 4) == 0 );
+}
+
+
+static void test_zero_more_capture_match(void)
+{
+    subreg_capture_t cap[3];
+
+    TEST_CHECK( subreg_match("B(AAC)*AAD", "BAACAACAAD", cap, 3, 4) == 3 );
+    TEST_CHECK( cap[0].length == 10 );
+    TEST_CHECK( memcmp(cap[0].start, "BAACAACAAD", 10) == 0 );
+    TEST_CHECK( cap[1].length == 3 );
+    TEST_CHECK( memcmp(cap[1].start, "AAC", 3) == 0 );
+    TEST_CHECK( cap[2].length == 3 );
+    TEST_CHECK( memcmp(cap[2].start, "AAC", 3) == 0 );
+}
+
+
 TEST_LIST =
 {
     {"empty_pass",                          test_empty_pass},
@@ -832,5 +880,9 @@ TEST_LIST =
     {"capture_or_plus_3",                   test_capture_or_plus_3},
     {"pos_look_ahead",                      test_pos_look_ahead},
     {"neg_look_ahead",                      test_neg_look_ahead},
+    {"optional_capture_no_match",           test_optional_capture_no_match},
+    {"optional_capture_match",              test_optional_capture_match},
+    {"zero_more_capture_no_match",          test_zero_more_capture_no_match},
+    {"zero_more_capture_match",             test_zero_more_capture_match},
     {0}
 };

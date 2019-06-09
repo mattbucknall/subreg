@@ -385,6 +385,7 @@ static int parse_repetition(state_t* state)
     char rc;
     
     regex_begin = state->regex;
+    check_point = state->input;
     
     result = parse_literal(state);
     if ( is_bad_result(result) || is_end(state->regex[0]) ) return result;
@@ -394,6 +395,7 @@ static int parse_repetition(state_t* state)
     if ( rc == '?' )
     {
         state->regex++;
+        if ( !is_match_result(result) ) state->input = check_point;
         return SUBREG_RESULT_INTERNAL_MATCH;
     }
     else if ( rc == '+' )
@@ -405,6 +407,7 @@ static int parse_repetition(state_t* state)
         if ( !is_match_result(result) )
         {
             state->regex++;
+            state->input = check_point;
             return SUBREG_RESULT_INTERNAL_MATCH;
         }
     }
