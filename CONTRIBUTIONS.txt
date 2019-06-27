@@ -1,0 +1,20 @@
+Subreg - Contributions
+======================
+
+Pull requests to add new features of fix bugs in SubReg are welcome.
+For them to be accepted, it is asked that they follow a few simple rules:
+
+1. SubReg is designed for use on systems with minimal memory resources
+   available. As such, SubReg may not use any dynamic memory allocation,
+   and memory allocated on the stack must be kept to a minimum.
+
+2. SubReg is fully re-entrant. As such, it may not depend on any writable
+   statically allocated memory. Large statically allocated const data
+   should be avoided.
+   
+3. Whilst there is no formal coding style defined, try to keep
+   contributions looking asthetically similar to the existing code.
+
+4. Minimal memory use is considered more important than execution speed,
+   so bear this in mind when designing any contributions to SubReg.
+ 
