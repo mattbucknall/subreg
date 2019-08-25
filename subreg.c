@@ -45,7 +45,7 @@ typedef struct
     const char* input;
     subreg_capture_t* captures;
     unsigned int max_captures;
-    unsigned int max_depth;
+    int max_depth;
     unsigned int capture_index;
     int depth;
     
@@ -537,7 +537,7 @@ int subreg_match(const char* regex, const char* input,
     state.input = input;
     state.captures = captures;
     state.max_captures = max_captures;
-    state.max_depth = max_depth;
+    state.max_depth = (int) max_depth;
     state.capture_index = 1;
     state.depth = 0;
     

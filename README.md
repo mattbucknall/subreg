@@ -75,7 +75,7 @@ This function takes the following arguments:
 |`input`|Null-terminated string to match against regex.|
 |`captures`|Pointer to array of captures to populate.|
 |`max_captures`|Maximum permitted number of captures (should be equal to or less than the number of elements in the array pointed to by captures).|
-|`max_depth`|Maximum depth of nested groups to allow in regex. This value is used to limit SubReg's system stack usage. A value of 4 is probably enough to cover most use cases.|
+|`max_depth`|Maximum depth of nested groups to allow in regex. This value is used to limit SubReg's system stack usage. A value of 4 is probably enough to cover most use cases. Must not exceed INT_MAX as defined in `limits.h`.|
 
 If `input` matches against `regex` then the number of captures made will be returned (the first capture spanning the entire input). If there is no match, the function will return zero otherwise one of the following return codes will be returned:
 

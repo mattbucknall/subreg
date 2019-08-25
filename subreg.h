@@ -116,7 +116,8 @@ typedef struct subreg_capture_t
  * \param max_depth     Maximum depth of nested groups to allow in regex.
  *                      This value is used to limit SubReg's system stack
  *                      usage. A value of 4 is probably enough to cover
- *                      most use cases.
+ *                      most use cases. Must not exceed INT_MAX as defined in
+ *                      'limits.h'.
  * 
  * \return              Number of captures if input matches regex (first
  *                      capture is always entire input), SUBREG_RESULT_NO_MATCH
