@@ -117,7 +117,7 @@ Please send bug reports/comments/suggestions regarding SubReg to matthew.bucknal
 ## License
 
 ```
-Copyright (c) 2016 Matthew T. Bucknall
+Copyright (c) 2016-2019 Matthew T. Bucknall
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
