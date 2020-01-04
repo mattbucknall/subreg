@@ -42,6 +42,8 @@ a|b       Matches a or b
 (?:)      Non-capturing group
 (?=)      Positive look-ahead
 (?!)      Negative look-ahead
+(?i)      Enable case insensitivity
+(?I)      Disable case insensitivity
 
 ^ $       See limitations
 ```
@@ -89,6 +91,7 @@ If `input` matches against `regex` then the number of captures made will be retu
 |`SUBREG_RESULT_INVALID_METACHARACTER`|-5|The regular expression contains an invalid metacharacter (typically a malformed \ escape sequence)|
 |`SUBREG_RESULT_MAX_DEPTH_EXCEEDED`|-6|The nesting depth of groups contained within the regular expression exceeds the limit specified by `max_depth`.|
 |`SUBREG_RESULT_CAPTURE_OVERFLOW`|-7|Capture array not large enough.|
+|`SUBREG_RESULT_INVALID_OPTION`|-8|Invalid inline option specified.|
 
 If a match occurs and `max_captures` = 0, this function still returns 1 but won't store the capture. This function may modify the captures array, even if an error occurs.
 
@@ -117,7 +120,7 @@ Please send bug reports/comments/suggestions regarding SubReg to matthew.bucknal
 ## License
 
 ```
-Copyright (c) 2016-2019 Matthew T. Bucknall
+Copyright (c) 2016-2020 Matthew T. Bucknall
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),

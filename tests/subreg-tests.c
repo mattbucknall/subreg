@@ -3,7 +3,7 @@
  * 
  * https://github.com/mattbucknall/subreg
  * 
- * Copyright (c) 2016-2019 Matthew T. Bucknall
+ * Copyright (c) 2016-2020 Matthew T. Bucknall
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -850,7 +850,7 @@ static void test_invalid_option(void)
     for (char c = 'a'; c <= 'z'; c++)
     {
         if ( c == 'i' ) continue;
-        
+
         snprintf(re, 8, "(?%c).*", c);
         TEST_CHECK( subreg_match(re, "ignored", NULL, 0, 4) == SUBREG_RESULT_INVALID_OPTION );
 
