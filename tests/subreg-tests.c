@@ -822,6 +822,44 @@ static void test_zero_more_capture_match(void)
 }
 
 
+static void test_nocase_option_enable_whole(void)
+{
+    TEST_CHECK( subreg_match("(?i)abcdefghijklmnopqrstuvwxyz0123456789", "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789", NULL, 0, 4) == 1 );
+}
+
+
+static void test_nocase_option_disable_whole(void)
+{
+    TEST_CHECK( subreg_match("(?I)abcdefghijklmnopqrstuvwxyz0123456789", "AbCdEfGhIjKlMnOpQrStUvWxYz0123456789", NULL, 0, 4) == 0 );
+    TEST_CHECK( subreg_match("(?I)abcdefghijklmnopqrstuvwxyz0123456789", "abcdefghijklmnopqrstuvwxyz0123456789", NULL, 0, 4) == 1 );
+}
+
+
+static void test_nocase_option_partial(void)
+{
+    TEST_CHECK( subreg_match("first (?i)second(?I) third", "first SECOND third", NULL, 0, 4) == 1);
+    TEST_CHECK( subreg_match("first (?i)second(?I) third", "first SeCoNd third", NULL, 0, 4) == 1);
+    TEST_CHECK( subreg_match("first (?i)second(?I) third", "first SECOND THIRD", NULL, 0, 4) == 0);
+}
+
+
+static void test_invalid_option(void)
+{
+    char re[8];
+
+    for (char c = 'a'; c <= 'z'; c++)
+    {
+        if ( c == 'i' ) continue;
+        
+        snprintf(re, 8, "(?%c).*", c);
+        TEST_CHECK( subreg_match(re, "ignored", NULL, 0, 4) == SUBREG_RESULT_INVALID_OPTION );
+
+        snprintf(re, 8, "(?%c).*", c - 'a' + 'A');
+        TEST_CHECK( subreg_match(re, "ignored", NULL, 0, 4) == SUBREG_RESULT_INVALID_OPTION );
+    }
+}
+
+
 TEST_LIST =
 {
     {"empty_pass",                          test_empty_pass},
@@ -884,5 +922,9 @@ TEST_LIST =
     {"optional_capture_match",              test_optional_capture_match},
     {"zero_more_capture_no_match",          test_zero_more_capture_no_match},
     {"zero_more_capture_match",             test_zero_more_capture_match},
+    {"nocase_option_enable_whole",          test_nocase_option_enable_whole},
+    {"nocase_option_disable_whole",         test_nocase_option_disable_whole},
+    {"nocase_option_partial",               test_nocase_option_partial},
+    {"invalid_option",                      test_invalid_option},
     {0}
 };

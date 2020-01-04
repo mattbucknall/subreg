@@ -29,9 +29,16 @@
 
 
 /**
+ * Result code. Invalid inline option specified.
+ */
+#define SUBREG_RESULT_INVALID_OPTION            -8
+
+
+/**
  * Result code. Capture array not large enough.
  */
 #define SUBREG_RESULT_CAPTURE_OVERFLOW          -7
+
 
 /**
  * Result code. The nesting depth of groups contained within the regular

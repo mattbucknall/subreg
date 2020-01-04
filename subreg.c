@@ -26,7 +26,14 @@
 
 #include "subreg.h"
 
-#define SUBREG_RESULT_INTERNAL_MATCH    1
+#define SUBREG_RESULT_INTERNAL_MATCH        1
+
+
+#define SUBREG_OPTION_CHAR_SET_NOCASE       'i'
+#define SUBREG_OPTION_CHAR_CLEAR_NOCASE     'I'
+
+
+#define SUBREG_OPTION_NOCASE                (1 << 0)
 
 
 typedef enum
@@ -48,6 +55,7 @@ typedef struct
     int max_depth;
     unsigned int capture_index;
     int depth;
+    int options;
     
 } state_t;
 
@@ -135,13 +143,6 @@ static int is_match_result(int result)
 }
 
 
-static int match_char(char c1, char c2)
-{
-    return (c1 == c2) ?
-            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
-}
-
-
 static int match_digit(char c)
 {
     return ((c >= '0') && (c <= '9')) ?
@@ -172,6 +173,26 @@ static int match_whitespace(char c)
 {
     return ((c == ' ') || (c == '\t') || (c == '\n') || (c == '\v') ||
             (c == '\f') || (c == '\r')) ?
+            SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
+}
+
+
+static int match_option(char c)
+{
+    return ((c >= 'A') && (c <= 'Z')) ||
+            ((c >= 'a') && (c <= 'z'));
+}
+
+
+static int match_char(state_t* state, char c1, char c2)
+{
+    if ( state->options & SUBREG_OPTION_NOCASE )
+    {
+        if ( c1 >= 'a' && c1 <= 'z' ) c1 = c1 - 'a' + 'A';
+        if ( c2 >= 'a' && c2 <= 'z' ) c2 = c2 - 'a' + 'A';
+    }
+
+    return (c1 == c2) ?
             SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
 }
 
@@ -280,6 +301,31 @@ static int parse_literal(state_t* state)
             if ( state->regex[0] == ':' ) mode = MODE_NON_CAPTURE;
             else if ( state->regex[0] == '=' ) mode = MODE_POS_LOOK_AHEAD;
             else if ( state->regex[0] == '!' ) mode = MODE_NEG_LOOK_AHEAD;
+            else if ( match_option(state->regex[0]) )
+            {
+                switch(state->regex[0])
+                {
+                case SUBREG_OPTION_CHAR_SET_NOCASE:
+                    state->options |= SUBREG_OPTION_NOCASE;
+                    break;
+
+                case SUBREG_OPTION_CHAR_CLEAR_NOCASE:
+                    state->options &= ~SUBREG_OPTION_NOCASE;
+                    break;
+
+                default:
+                    return SUBREG_RESULT_INVALID_OPTION;
+                }
+
+                state->regex++;
+
+                rc = state->regex[0];
+                if ( rc != ')' ) return SUBREG_RESULT_MISSING_BRACKET;
+
+                state->regex++;
+
+                return SUBREG_RESULT_INTERNAL_MATCH;
+            }
             else return SUBREG_RESULT_ILLEGAL_EXPRESSION;
             
             state->regex++;
@@ -348,7 +394,7 @@ static int parse_literal(state_t* state)
             result = decode_non_class_metacharacter(state, &rc);
             if ( is_bad_result(result) ) return result;
             
-            result = match_char(c, rc);
+            result = match_char(state, c, rc);
             if ( is_match_result(result) ) state->input++;
             
             return result;
@@ -366,7 +412,7 @@ static int parse_literal(state_t* state)
             break;
             
         default:
-            result = match_char(c, rc);
+            result = match_char(state, c, rc);
         }
     }
     
@@ -493,8 +539,13 @@ static int parse_alternation(state_t* state)
 
 static int parse_sub_expr(state_t* state)
 {
+    int saved_options;
     int result;
+
+    saved_options = state->options;
     result = parse_alternation(state);
+    state->options = saved_options;
+
     return result;
 }
 
@@ -540,6 +591,7 @@ int subreg_match(const char* regex, const char* input,
     state.max_depth = (int) max_depth;
     state.capture_index = 1;
     state.depth = 0;
+    state.options = 0;
     
     result = parse_expr(&state);
     
