@@ -30,7 +30,8 @@ SubReg currently supports the following regular expression syntax:
 \S        Matches any non-whitespace character
 \w        Matches any word character (0-9, A-Z, a-z or _)
 \W        Matches any non-word character
-\!X       Matches any character that is not X
+\!X       Matches any character that is not X (where X is any character
+          or \b, \f, \n, \r, \t, \v or \xXX escape sequence)
 
 \? \*     Matches meta character
 \+ etc.
@@ -121,7 +122,7 @@ Please send bug reports/comments/suggestions regarding SubReg to matthew.bucknal
 ## License
 
 ```
-Copyright (c) 2016-2020 Matthew T. Bucknall
+Copyright (c) 2016-2021 Matthew T. Bucknall
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
