@@ -21,7 +21,7 @@ SubReg currently supports the following regular expression syntax:
 \r        Matches carriage return character (ASCII code 0x0D)
 \t        Matches horizontal tab character (ASCII code 0x09)
 \v        Matches vertical tab character (ASCII code 0x0B)
-\xXX      Matches character 0xXX
+\xXX      Matches ASCII code 0xXX
 \d        Matches any digit character (0-9, ASCII codes 0x30-0x39)
 \D        Matches any non-digit character
 \h        Matches any hexadecimal character (0-9, A-F or a-f)
@@ -30,6 +30,7 @@ SubReg currently supports the following regular expression syntax:
 \S        Matches any non-whitespace character
 \w        Matches any word character (0-9, A-Z, a-z or _)
 \W        Matches any non-word character
+\!X       Matches any character that is not X
 
 \? \*     Matches meta character
 \+ etc.

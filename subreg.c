@@ -241,6 +241,16 @@ static int decode_non_class_metacharacter(state_t* state, char* c)
     
     switch (rc)
     {
+    case 'D':
+    case 'H':
+    case 'S':
+    case 'W':
+    case 'd':
+    case 'h':
+    case 's':
+    case 'w':
+    case '!':   return SUBREG_RESULT_ILLEGAL_EXPRESSION;
+    
     case 'b':   *c = '\b';  break;
     case 'f':   *c = '\f';  break;
     case 'n':   *c = '\n';  break;
@@ -389,6 +399,30 @@ static int parse_literal(state_t* state)
         case 'h':   result = match_hexadecimal(c);                  break;
         case 's':   result = match_whitespace(c);                   break;
         case 'w':   result = match_word(c);                         break;
+        case '!':
+            state->regex++;
+            rc = state->regex[0];
+            if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+
+            if ( rc == '\\' )
+            {
+                state->regex++;
+                rc = state->regex[0];
+                if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+
+                result = decode_non_class_metacharacter(state, &rc);
+                if ( is_bad_result(result) ) return result;
+            }
+
+            if ( is_end(c) ) return SUBREG_RESULT_NO_MATCH;
+            
+            result = match_char(state, c, rc);
+            if ( is_bad_result(result) ) return result;
+            
+            result = is_match_result(result) ?
+                    SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
+
+            break;
         
         default:
             result = decode_non_class_metacharacter(state, &rc);

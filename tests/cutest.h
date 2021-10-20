@@ -309,7 +309,7 @@ test_do_run__(const struct test__* test)
         test_current_already_logged__++;
     } else if(test_verbose_level__ >= 1) {
         size_t n;
-        char spaces[32];
+        char spaces[48];
 
         n = test_print_in_color__(CUTEST_COLOR_DEFAULT_INTENSIVE__, "Test %s... ", test->name);
         memset(spaces, ' ', sizeof(spaces));

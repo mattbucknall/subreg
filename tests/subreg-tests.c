@@ -406,6 +406,11 @@ static void test_hex_escape_code(void)
 }
 
 
+static void test_one_or_more_hex_escape_codes(void) {
+    TEST_CHECK( subreg_match("\\x21+", "!!!!", 0, 0, 4) == 1 );
+}
+
+
 static void test_any(void)
 {
     char buffer[2];
@@ -860,6 +865,58 @@ static void test_invalid_option(void)
 }
 
 
+static void test_invalid_inverted_match(void)
+{
+    TEST_CHECK( subreg_match("\\!", "x", NULL, 0, 4) == SUBREG_RESULT_INVALID_METACHARACTER );
+}
+
+
+static void test_inverted_match(void)
+{
+    TEST_CHECK( subreg_match("\\!a", "b", NULL, 0, 4) == 1 );
+}
+
+
+static void test_inverted_non_match(void)
+{
+    TEST_CHECK( subreg_match("\\!b", "b", NULL, 0, 4) == 0 );
+}
+
+
+static void test_one_or_more_inverted_match(void)
+{
+    TEST_CHECK( subreg_match("\\!a+", "bcd", NULL, 0, 4) == 1 );
+}
+
+
+static void test_one_or_more_inverted_non_match(void)
+{
+    TEST_CHECK( subreg_match("\\!a+", "bcda", NULL, 0, 4) == 0 );
+}
+
+
+static void test_capture_inverted_match(void)
+{
+    subreg_capture_t cap[2];
+
+    TEST_CHECK( subreg_match("foo\"(\\!\"+)\"bar", "foo\"test\"bar", cap, 2, 4) == 2 );
+    TEST_CHECK( cap[1].length == 4 );
+    TEST_CHECK( memcmp(cap[1].start, "test", 4) == 0 );
+}
+
+
+static void test_inverted_hex_match(void)
+{
+    TEST_CHECK( subreg_match("\\!\\x21", "A", NULL, 0, 4) == 1 );
+}
+
+
+static void test_inverted_hex_non_match(void)
+{
+    TEST_CHECK( subreg_match("\\!\\x21", "!", NULL, 0, 4) == 0 );
+}
+
+
 TEST_LIST =
 {
     {"empty_pass",                          test_empty_pass},
@@ -871,6 +928,7 @@ TEST_LIST =
     {"non_digit",                           test_non_digit},
     {"hex_digit",                           test_hex_digit},
     {"non_hex_digit",                       test_non_hex_digit},
+    {"one_or_more_hex_escape_codes",        test_one_or_more_hex_escape_codes},
     {"whitespace",                          test_whitespace},
     {"non_whitespace",                      test_non_whitespace},
     {"word",                                test_word},
@@ -926,5 +984,14 @@ TEST_LIST =
     {"nocase_option_disable_whole",         test_nocase_option_disable_whole},
     {"nocase_option_partial",               test_nocase_option_partial},
     {"invalid_option",                      test_invalid_option},
+    {"invalid_inverted_match",              test_invalid_inverted_match},
+    {"inverted_match",                      test_inverted_match},
+    {"inverted_non_match",                  test_inverted_non_match},
+    {"one_or_more_inverted_match",          test_one_or_more_inverted_match},
+    {"one_or_more_inverted_non_match",      test_one_or_more_inverted_non_match},
+    {"capture_inverted_match",              test_capture_inverted_match},
+    {"inverted_hex_match",                  test_inverted_hex_match},
+    {"inverted_hex_non_match",              test_inverted_hex_non_match},
     {0}
 };
+
