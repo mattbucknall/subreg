@@ -436,6 +436,41 @@ static int parse_literal(state_t* state)
         
         state->regex++;
     }
+    else if ( rc == '[' )
+    {
+        rc = state->regex[0];
+        if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+        mode = MODE_CAPTURE; // NON_CAPTURE means inversion
+        if ( rc == '^' )
+        {
+            mode = MODE_NON_CAPTURE;
+            state->regex++;
+            rc = state->regex[0];
+        }
+        result = SUBREG_RESULT_NO_MATCH;
+        do { // note: ']' as first char does not close the set
+            result = match_char(state, c, rc);
+            if ( is_match_result(result) ) {
+                result = SUBREG_RESULT_INTERNAL_MATCH;
+                do {
+                    state->regex++;
+                    rc = state->regex[0];
+                    if ( is_end(rc) )
+                            return SUBREG_RESULT_INVALID_METACHARACTER;
+                } while ( rc != ']' );
+                break;
+            }
+            state->regex++;
+            rc = state->regex[0];
+            if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+        } while ( rc != ']' );
+        state->regex++;
+        if ( mode == MODE_NON_CAPTURE /*&& !is_bad_result(result)*/ )
+        {
+            result = is_match_result(result) || is_end(c) ?
+                    SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
+        }
+    }
     else
     {
         switch (rc)
