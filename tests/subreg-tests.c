@@ -930,6 +930,22 @@ static void test_inverted_bracket_set(void)
     TEST_CHECK( subreg_match("[^abc]", "x", NULL, 0, 4) == 1 );
 }
 
+static void test_bracket_range(void)
+{
+    TEST_CHECK( subreg_match("[a-z]", "h", NULL, 0, 4) == 1 );
+    TEST_CHECK( subreg_match("[A-Z]", "h", NULL, 0, 4) == 0 );
+    TEST_CHECK( subreg_match("[-A-Z0-9b]*", "TESTb065-", NULL, 0, 4) == 1 );
+    TEST_CHECK( subreg_match("[-A-Z0-9b]*", "abc", NULL, 0, 4) == 0 );
+}
+
+static void test_inverted_bracket_range(void)
+{
+    TEST_CHECK( subreg_match("[^a-z]", "h", NULL, 0, 4) == 0 );
+    TEST_CHECK( subreg_match("[^A-Z]", "h", NULL, 0, 4) == 1 );
+    TEST_CHECK( subreg_match("[^-A-Z0-9b]*", "TESTb065-", NULL, 0, 4) == 0 );
+    TEST_CHECK( subreg_match("[^-A-Z0-9b]*", "axc", NULL, 0, 4) == 1 );
+}
+
 
 TEST_LIST =
 {
@@ -1007,8 +1023,9 @@ TEST_LIST =
     {"inverted_hex_match",                  test_inverted_hex_match},
     {"inverted_hex_non_match",              test_inverted_hex_non_match},
 	{"bracket_set",                         test_bracket_set},
-    {"inverted_bracket_set",                         test_inverted_bracket_set},
-//	{"bracket_range",                       test_bracket_range},
+    {"inverted_bracket_set",                test_inverted_bracket_set},
+	{"bracket_range",                       test_bracket_range},
+    {"inverted_bracket_range",              test_inverted_bracket_range},
     {0}
 };
 
