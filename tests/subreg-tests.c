@@ -4,6 +4,10 @@
  * https://github.com/mattbucknall/subreg
  * 
  * Copyright (c) 2016-2024 Matthew T. Bucknall
+ *
+ * Contributions:
+ *
+ *   Character sets and ranges contributed by BeetMacol
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
