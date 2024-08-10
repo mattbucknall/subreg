@@ -197,6 +197,20 @@ static int match_char(state_t* state, char c1, char c2)
 }
 
 
+static int match_range(state_t* state, char c, char c1, char c2)
+{
+    if ( state->options & SUBREG_OPTION_NOCASE )
+    {
+        if ( c >= 'a' && c <= 'z' ) c = c - 'a' + 'A';
+        if ( c1 >= 'a' && c1 <= 'z' ) c1 = c1 - 'a' + 'A';
+        if ( c2 >= 'a' && c2 <= 'z' ) c2 = c2 - 'a' + 'A';
+    }
+
+    return (c >= c1 && c <= c2) ?
+           SUBREG_RESULT_INTERNAL_MATCH : SUBREG_RESULT_NO_MATCH;
+}
+
+
 static int invert_match(char c, int (*match_func)(char))
 {
     int result;
@@ -435,6 +449,48 @@ static int parse_literal(state_t* state)
         }
         
         state->regex++;
+    }
+    else if ( rc == '[' )
+    {
+        rc = state->regex[0];
+        if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+        mode = MODE_CAPTURE; // NON_CAPTURE means inversion
+        if ( rc == '^' )
+        {
+            mode = MODE_NON_CAPTURE;
+            state->regex++;
+            rc = state->regex[0];
+        }
+        result = SUBREG_RESULT_NO_MATCH;
+        do { // note: ']' as first char does not close the set
+            if ( state->regex[1] == '-' && match_word(state->regex[2]) )
+            { // range
+                result = match_range(state, c, rc, state->regex[2]);
+                state->regex += 2;
+            }
+            else
+            { // char
+                result = match_char(state, c, rc);
+            }
+            if ( is_match_result(result) ) {
+                do {
+                    state->regex++;
+                    rc = state->regex[0];
+                    if ( is_end(rc) )
+                            return SUBREG_RESULT_INVALID_METACHARACTER;
+                } while ( rc != ']' );
+                break;
+            }
+            state->regex++;
+            rc = state->regex[0];
+            if ( is_end(rc) ) return SUBREG_RESULT_INVALID_METACHARACTER;
+        } while ( rc != ']' );
+        state->regex++;
+        if ( mode == MODE_NON_CAPTURE /*&& !is_bad_result(result)*/ )
+        {
+            result = is_match_result(result) || is_end(c) ?
+                    SUBREG_RESULT_NO_MATCH : SUBREG_RESULT_INTERNAL_MATCH;
+        }
     }
     else
     {
