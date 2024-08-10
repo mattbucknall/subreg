@@ -40,7 +40,7 @@ SubReg currently supports the following regular expression syntax:
 *         Matches zero or more times
 +         Matches one or more times
 a|b       Matches a or b
-[ace]     Matches characters in given set (] must be first character if it is part of a set, i.e. []ace])
+[ace]     Matches characters in given set (']' must be first character if in set)
 [A-Za-z]  Matches characters in given ranges (character sets and ranges can be mixed)
 [^ace]    Matches characters not in given set
 [^A-Za-z] Matches characters not in given ranges
