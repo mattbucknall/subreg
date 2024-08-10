@@ -1,5 +1,5 @@
 # SubReg
-A small footprint regular expression engine written in ANSI C, originially
+A small footprint regular expression subset engine written in ANSI C, originially
 implented for use in embedded systems with limited memory resources.
 
 ## Features
@@ -40,6 +40,10 @@ SubReg currently supports the following regular expression syntax:
 *         Matches zero or more times
 +         Matches one or more times
 a|b       Matches a or b
+[ace]     Matches characters in given set (] must be first character if it is part of a set, i.e. []ace])
+[A-Za-z]  Matches characters in given ranges (character sets and ranges can be mixed)
+[^ace]    Matches characters not in given set
+[^A-Za-z] Matches characters not in given ranges
 ()        Capturing group
 (?:)      Non-capturing group
 (?=)      Positive look-ahead
@@ -122,7 +126,7 @@ Please send bug reports/comments/suggestions regarding SubReg to matthew.bucknal
 ## License
 
 ```
-Copyright (c) 2016-2021 Matthew T. Bucknall
+Copyright (c) 2016-2024 Matthew T. Bucknall
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
