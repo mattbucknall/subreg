@@ -1,5 +1,5 @@
 # SubReg
-A small footprint regular expression subset engine written in ANSI C, originially
+A small footprint non-backtracking regular expression subset engine written in ANSI C, originially
 implented for use in embedded systems with limited memory resources.
 
 # Note
