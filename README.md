@@ -2,6 +2,10 @@
 A small footprint regular expression subset engine written in ANSI C, originially
 implented for use in embedded systems with limited memory resources.
 
+# Note
+I now consider Subreg to be feature-complete, so future updates will just cover bug fixes and general maintenance.
+Please don’t open feature requests or feature PRs.
+
 ## Features
 - Single source file, single header - Just statically link with your own code
 - MIT license - Permits use in open and closed source projects
